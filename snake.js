@@ -9,27 +9,15 @@ const randInt = (min, max) => {
 };
 
 class Snake {
-  constructor(startX, startY, res) {
+  constructor(startX, startY, res, gameBounds) {
     this.res = res;
+    this.gameBounds = gameBounds;
 
     this.head = createVector(startX * this.res, startY * this.res);
     this.tail = [];
-
     this.velocity = createVector(0, 0);
-
-    this.gameZero = createVector(
-      (width - cols * resolution) / 2,
-      (height - rows * resolution) / 2
-    );
-    this.gameBounds = p5.Vector.add(
-      createVector(cols * resolution, rows * resolution),
-      this.gameZero
-    );
-
     this.randomApple();
-
     this.dead = false;
-
     this.score = 0;
   }
 
@@ -47,19 +35,19 @@ class Snake {
   }
 
   randomApple() {
-    while (true) {
+    const maxAttempts = 100;
+    for (let i = 0; i < maxAttempts; i++) {
       this.apple = createVector(randInt(cols), randInt(rows));
       this.apple.mult(this.res);
       if (
         !this.checkTail(this.apple, true) &&
-        !(
-          this.apple.x >= width - this.gameZero.x * 2 ||
-          this.apple.y >= height - this.gameZero.y * 2 ||
-          this.apple.x < 0 ||
-          this.apple.y < 0
-        )
-      )
+        this.apple.x >= 0 &&
+        this.apple.y >= 0 &&
+        this.apple.x < this.gameBounds.x &&
+        this.apple.y < this.gameBounds.y
+      ) {
         break;
+      }
     }
   }
 
@@ -72,7 +60,7 @@ class Snake {
     text(this.score, width / 2, height / 2 + 60);
 
     stroke(0);
-    fill(255, 87, 34, 200);
+    fill(230, 100, 34, 200);
     rect(this.head.x, this.head.y, this.res, this.res);
     fill(255, 0, 0, 200);
     for (const tailSegment of this.tail) {
@@ -86,10 +74,10 @@ class Snake {
       stroke(255);
       fill(17);
       textSize(125);
-      text('YOU DED BOI', width / 2, height / 2 + 10);
+      text('YOU DED BOI', width / 2, height / 2);
       textSize(75);
       strokeWeight(3);
-      text('ctrl+r to restart', width / 2, height / 2 + 100);
+      text('[space] to restart', width / 2, height / 2 + 100);
     }
   }
 
@@ -134,9 +122,9 @@ class Snake {
   checkHead(head) {
     return !(
       head.x < 0 ||
-      head.x >= width - this.gameZero.x * 2 ||
+      head.x >= this.gameBounds.x ||
       head.y < 0 ||
-      head.y >= height - this.gameZero.y * 2
+      head.y >= this.gameBounds.y
     );
   }
 
