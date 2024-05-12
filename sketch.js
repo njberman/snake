@@ -6,14 +6,14 @@ let snake;
 
 let clicked = false;
 
-const music = new Audio('music.waV');
+const music = new Audio('/music.wav');
 music.loop = true;
 music.volume = 0.4;
 
-const eatSound = new Audio('eat.mp3');
+const eatSound = new Audio('/eat.mp3');
 eatSound.playbackRate = 2.0;
 
-const dieSound = new Audio('die.mp3');
+const dieSound = new Audio('/die.mp3');
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
