@@ -73,6 +73,7 @@ function keyPressed() {
 
 function restartGame() {
   snake = new Snake(floor(cols / 2), floor(rows / 2), resolution, gameBounds);
+  dieSound.pause();
   clicked = true;
   music.currentTime = 0;
   music.play();
