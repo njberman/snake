@@ -57,8 +57,18 @@ class Snake {
     noStroke();
     fill(255, 100);
     textAlign(CENTER, CENTER);
-    text(this.score, width / 2, height / 2 - 21);
+    text(this.score, this.gameBounds.x - width / 2, height / 2);
 
+    // Draw line between each tailSegment
+    for (let i = 0; i < this.tail.length - 1; i++) {
+      stroke(255);
+      line(
+        this.tail[i].x + this.res / 2,
+        this.tail[i].y + this.res / 2,
+        this.tail[i + 1].x + this.res / 2,
+        this.tail[i + 1].y + this.res / 2
+      );
+    }
     stroke(0);
     fill(230, 100, 34, 200);
     rect(this.head.x, this.head.y, this.res, this.res);
@@ -75,10 +85,14 @@ class Snake {
 
       fill(255);
       textSize(125);
-      text('YOU DED BOI', width / 2, height / 2 - 50);
+      text('YOU DED BOI', this.gameBounds.x - width / 2, height / 2 - 50);
       textSize(75);
       strokeWeight(10);
-      text('[space] to restart', width / 2, height / 2 + 40);
+      text(
+        '[space] to restart',
+        this.gameBounds.x - width / 2,
+        height / 2 + 40
+      );
     }
   }
 

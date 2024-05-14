@@ -15,7 +15,7 @@ function preload() {
   myFilterShader = loadShader('shader.vert', 'shader.frag');
 }
 
-function setup() {
+async function setup() {
   createCanvas(windowWidth, windowHeight);
   cols = floor(width / resolution);
   rows = floor(height / resolution);
@@ -23,18 +23,18 @@ function setup() {
   snake = new Snake(floor(cols / 2), floor(rows / 2), resolution, gameBounds);
 
   document.getElementById('defaultCanvas0').addEventListener('click', () => {
-    if (!clicked) {
+    if (!clicked && !leaderBoardShowing) {
       clicked = true;
       music.play();
     }
   });
 
   textFont('monospace');
+
+  await updateLeaderBoard();
 }
 
-function pixelProcessing() {}
-
-function draw() {
+async function draw() {
   background(0);
   translate((width - cols * resolution) / 2, (height - rows * resolution) / 2);
 
@@ -47,8 +47,15 @@ function draw() {
     showStartMessage();
   }
 
+  myFilterShader.setUniform('u_bounds', [
+    (width - cols * resolution) / 2 / width,
+    (height - rows * resolution) / 2 / height,
+  ]);
   myFilterShader.setUniform('u_resolution', [width, height]);
   filterShader(myFilterShader);
+
+  drawLeaderboard();
+  if (frameCount % 60 === 0) await updateLeaderBoard();
 }
 
 function drawGrid() {
@@ -68,17 +75,23 @@ function showStartMessage() {
   fill(255);
   textSize(100);
   textAlign(CENTER, CENTER);
-  text('Click anywhere to start', width / 2, height / 2 - 20);
+  text(
+    'Click anywhere to start',
+    snake.gameBounds.x - width / 2,
+    height / 2 - 20
+  );
 }
 
 function keyPressed() {
-  if (keyCode === 32) {
-    // Check if spacebar is pressed
-    if (snake.dead) {
-      restartGame();
+  if (!leaderBoardShowing) {
+    if (keyCode === 32) {
+      // Check if spacebar is pressed
+      if (snake.dead) {
+        restartGame();
+      }
+    } else {
+      snake.move(key);
     }
-  } else {
-    snake.move(key);
   }
 }
 
