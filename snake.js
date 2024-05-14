@@ -57,7 +57,7 @@ class Snake {
     noStroke();
     fill(255, 100);
     textAlign(CENTER, CENTER);
-    text(this.score, width / 2, height / 2 + 60);
+    text(this.score, width / 2, height / 2 - 21);
 
     stroke(0);
     fill(230, 100, 34, 200);
@@ -71,13 +71,14 @@ class Snake {
     rect(this.apple.x, this.apple.y, this.res, this.res);
 
     if (this.dead) {
-      stroke(255);
-      fill(17);
+      strokeWeight(10);
+
+      fill(255);
       textSize(125);
-      text('YOU DED BOI', width / 2, height / 2);
+      text('YOU DED BOI', width / 2, height / 2 - 50);
       textSize(75);
-      strokeWeight(3);
-      text('[space] to restart', width / 2, height / 2 + 100);
+      strokeWeight(10);
+      text('[space] to restart', width / 2, height / 2 + 40);
     }
   }
 

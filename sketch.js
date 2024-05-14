@@ -9,6 +9,11 @@ music.volume = 0.4;
 const eatSound = new Audio('/eat.mp3');
 const dieSound = new Audio('/die.mp3');
 let gameBounds;
+let myFilterShader;
+
+function preload() {
+  myFilterShader = loadShader('shader.vert', 'shader.frag');
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -16,22 +21,24 @@ function setup() {
   rows = floor(height / resolution);
   gameBounds = createVector(cols * resolution, rows * resolution);
   snake = new Snake(floor(cols / 2), floor(rows / 2), resolution, gameBounds);
-  textFont('monospace');
 
-  drawGrid();
   document.getElementById('defaultCanvas0').addEventListener('click', () => {
     if (!clicked) {
       clicked = true;
       music.play();
     }
   });
+
+  textFont('monospace');
 }
 
+function pixelProcessing() {}
+
 function draw() {
-  background(96, 125, 139);
+  background(0);
   translate((width - cols * resolution) / 2, (height - rows * resolution) / 2);
 
-  drawGrid(); // Call drawGrid function here
+  drawGrid();
 
   if (clicked) {
     snake.show();
@@ -39,6 +46,9 @@ function draw() {
   } else {
     showStartMessage();
   }
+
+  myFilterShader.setUniform('u_resolution', [width, height]);
+  filterShader(myFilterShader);
 }
 
 function drawGrid() {
@@ -53,8 +63,9 @@ function drawGrid() {
 }
 
 function showStartMessage() {
-  stroke(255);
-  fill(0);
+  strokeWeight(10);
+  stroke(0);
+  fill(255);
   textSize(100);
   textAlign(CENTER, CENTER);
   text('Click anywhere to start', width / 2, height / 2 - 20);
