@@ -10,9 +10,13 @@ const eatSound = new Audio('/eat.mp3');
 const dieSound = new Audio('/die.mp3');
 let gameBounds;
 let myFilterShader;
+let noiseFilterShader;
+let glitchFilterShader;
 
 function preload() {
-  myFilterShader = loadShader('shader.vert', 'shader.frag');
+  myFilterShader = loadShader('/shader.vert', '/shader.frag');
+  noiseFilterShader = loadShader('/shader.vert', '/noise.frag');
+  glitchFilterShader = loadShader('/shader.vert', '/glitch.frag');
 }
 
 async function setup() {
@@ -31,7 +35,7 @@ async function setup() {
 
   textFont('monospace');
 
-  await updateLeaderBoard();
+  // await updateLeaderBoard();
 }
 
 async function draw() {
@@ -42,20 +46,41 @@ async function draw() {
 
   if (clicked) {
     snake.show();
-    if (frameCount % 10 === 0) snake.update();
+    if (frameCount % 5 === 0 && !leaderBoardShowing) snake.update();
   } else {
     showStartMessage();
   }
 
-  myFilterShader.setUniform('u_bounds', [
-    (width - cols * resolution) / 2 / width,
-    (height - rows * resolution) / 2 / height,
-  ]);
-  myFilterShader.setUniform('u_resolution', [width, height]);
-  filterShader(myFilterShader);
+  if (leaderBoardShowing) {
+    noiseFilterShader.setUniform('millis', millis());
+    noiseFilterShader.setUniform('grainAmp', 0.1);
+    filterShader(noiseFilterShader);
 
-  drawLeaderboard();
-  if (frameCount % 60 === 0) await updateLeaderBoard();
+    glitchFilterShader.setUniform('noise', getNoiseValue());
+    filterShader(glitchFilterShader);
+    drawLeaderboard();
+  } else {
+    myFilterShader.setUniform('u_bounds', [
+      (width - cols * resolution) / 2 / width,
+      (height - rows * resolution) / 2 / height,
+    ]);
+    myFilterShader.setUniform('u_resolution', [width, height]);
+    filterShader(myFilterShader);
+  }
+  // if (frameCount % 60 === 0) await updateLeaderBoard();
+}
+
+function getNoiseValue() {
+  let v = noise(millis() / 100);
+  const cutOff = 0.4;
+
+  if (v < cutOff) {
+    return 0;
+  }
+
+  v = pow(((v - cutOff) * 1) / (1 - cutOff), 2);
+
+  return v;
 }
 
 function drawGrid() {
@@ -80,6 +105,12 @@ function showStartMessage() {
     snake.gameBounds.x - width / 2,
     height / 2 - 20
   );
+  textSize(25);
+  text(
+    'Press L anytime to view leaderboard (and pause game)',
+    snake.gameBounds.x - width / 2,
+    height / 2 + 50
+  );
 }
 
 function keyPressed() {
@@ -93,6 +124,8 @@ function keyPressed() {
       snake.move(key);
     }
   }
+
+  if (key === 'l') leaderBoardShowing = !leaderBoardShowing;
 }
 
 function restartGame() {
