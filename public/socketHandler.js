@@ -13,5 +13,6 @@ socket.on('update leaderboard', (JSONstring) => {
       name,
       score,
       date: new Date(date),
-    }));
+    }))
+    .sort((a, b) => b.score - a.score);
 });

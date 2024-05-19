@@ -19,6 +19,13 @@ class Snake {
     this.randomApple();
     this.dead = false;
     this.score = 0;
+
+    this.keylog = [];
+
+    this.UP = createVector(0, -1);
+    this.DOWN = createVector(0, 1);
+    this.RIGHT = createVector(1, 0);
+    this.LEFT = createVector(-1, 0);
   }
 
   updateScore() {
@@ -62,16 +69,21 @@ class Snake {
     // Draw line between each tailSegment
     for (let i = 0; i < this.tail.length - 1; i++) {
       stroke(255);
-      line(
-        this.tail[i].x + this.res / 2,
-        this.tail[i].y + this.res / 2,
-        this.tail[i + 1].x + this.res / 2,
-        this.tail[i + 1].y + this.res / 2
-      );
+      // line(
+      //   this.tail[i].x + this.res / 2,
+      //   this.tail[i].y + this.res / 2,
+      //   this.tail[i + 1].x + this.res / 2,
+      //   this.tail[i + 1].y + this.res / 2
+      // );
     }
     stroke(0);
     fill(230, 100, 34, 200);
     rect(this.head.x, this.head.y, this.res, this.res);
+
+    noStroke();
+    fill(255);
+    stroke(0);
+
     fill(255, 0, 0, 200);
     for (const tailSegment of this.tail) {
       rect(tailSegment.x, tailSegment.y, this.res, this.res);
@@ -96,40 +108,40 @@ class Snake {
     }
   }
 
+  keyToVel(key) {
+    switch (key) {
+      case 'w':
+      case 'ArrowUp':
+        return this.UP;
+        break;
+      case 's':
+      case 'ArrowDown':
+        return this.DOWN;
+        break;
+      case 'a':
+      case 'ArrowLeft':
+        return this.LEFT;
+        break;
+      case 'd':
+      case 'ArrowRight':
+        return this.RIGHT;
+        break;
+
+      default:
+        break;
+    }
+  }
+
   move(key) {
     if (!this.dead) {
-      if (this.tail.length !== 0) {
-        if (
-          (key === 'w' || key === 'ArrowUp') &&
-          !(this.velocity.x === 0 && this.velocity.y === 1)
-        ) {
-          this.velocity = createVector(0, -1);
-        } else if (
-          (key === 's' || key === 'ArrowDown') &&
-          !(this.velocity.x === 0 && this.velocity.y === -1)
-        ) {
-          this.velocity = createVector(0, 1);
-        } else if (
-          (key === 'a' || key === 'ArrowLeft') &&
-          !(this.velocity.x === 1 && this.velocity.y === 0)
-        ) {
-          this.velocity = createVector(-1, 0);
-        } else if (
-          (key === 'd' || key === 'ArrowRight') &&
-          !(this.velocity.x === -1 && this.velocity.y === 0)
-        ) {
-          this.velocity = createVector(1, 0);
-        }
-      } else {
-        if (key === 'w' || key === 'ArrowUp') {
-          this.velocity = createVector(0, -1);
-        } else if (key === 's' || key === 'ArrowDown') {
-          this.velocity = createVector(0, 1);
-        } else if (key === 'a' || key === 'ArrowLeft') {
-          this.velocity = createVector(-1, 0);
-        } else if (key === 'd' || key === 'ArrowRight') {
-          this.velocity = createVector(1, 0);
-        }
+      this.keylog.push(key);
+      const newVelocity = this.keyToVel(key);
+
+      if (
+        this.tail.length === 0 ||
+        !newVelocity.equals(p5.Vector.mult(this.velocity, -1))
+      ) {
+        this.velocity = newVelocity;
       }
     }
   }
@@ -143,11 +155,44 @@ class Snake {
     );
   }
 
+  checkVector(a, b) {
+    return a.x === b.x && a.y === b.y;
+  }
+
   update() {
     if (
       !(this.velocity.x === this.velocity.y && this.velocity.x === 0) &&
       !this.dead
     ) {
+      if (this.keylog.length > 1)
+        console.log(
+          {
+            x: this.keyToVel(this.keylog[this.keylog.length - 1]).x,
+            y: this.keyToVel(this.keylog[this.keylog.length - 1]).y,
+          },
+          { x: this.velocity.x, y: this.velocity.y },
+          this.checkVector(
+            this.velocity,
+            this.keyToVel(this.keylog[this.keylog.length - 1])
+              .copy()
+              .mult(-1)
+          )
+        );
+
+      if (
+        this.keylog.length >= 2 &&
+        this.tail.length !== 0 &&
+        this.checkVector(
+          this.velocity,
+          this.keyToVel(this.keylog[this.keylog.length - 1])
+        )
+      ) {
+        console.log('in the if statement');
+        this.velocity = this.keyToVel(this.keylog[this.keylog.length - 2]);
+      }
+      console.log({ x: this.velocity.x, y: this.velocity.y });
+      this.keylog = [];
+
       const newHead = p5.Vector.add(
         this.head,
         p5.Vector.mult(this.velocity, this.res)
@@ -169,25 +214,8 @@ class Snake {
             music.pause();
             return;
           }
-        } else {
-          if (!this.checkHead(newHead)) {
-            this.dead = true;
-            dieSound.play();
-            music.pause();
-            return;
-          }
-        }
-
-        if (!this.checkHead(newHead)) {
-          this.tail = prevTail;
-          this.dead = true;
-          dieSound.play();
-          music.pause();
-          return;
         }
         this.head = newHead;
-
-        // Check if we have hit ourselves
 
         // Check for new fruit
         this.eat(prevEndTail || this.head);
@@ -195,6 +223,7 @@ class Snake {
         this.dead = true;
         dieSound.play();
         music.pause();
+        return;
       }
     }
   }

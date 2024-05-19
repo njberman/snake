@@ -1,4 +1,4 @@
-const resolution = 50;
+const resolution = 70;
 let rows;
 let cols;
 let snake;
@@ -45,8 +45,10 @@ async function draw() {
   drawGrid();
 
   if (clicked) {
+    if (!leaderBoardShowing && frameCount % 5 === 0) {
+      snake.update();
+    }
     snake.show();
-    if (frameCount % 5 === 0 && !leaderBoardShowing) snake.update();
   } else {
     showStartMessage();
   }

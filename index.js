@@ -63,7 +63,7 @@ const main = async () => {
   });
 
   server.listen(port, () => {
-    console.log(`Listening on port ${port}`);
+    console.log(`Listening at http://localhost:${port}`);
   });
 };
 main();

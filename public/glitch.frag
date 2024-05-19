@@ -13,7 +13,7 @@ uniform float noise; // set from p5 sketch
 
 void main() {  
   // Calculate offset based on noise value
-  vec2 offset = vec2(noise * 0.05, 0.);
+  vec2 offset = vec2(noise * 0.05, -noise * 0.05);
 
   // Read pixel colour with offset
   vec3 col;
