@@ -160,24 +160,27 @@ class Snake {
   }
 
   update() {
+    // console.log(this.velocity);
     if (
+      this.velocity &&
       !(this.velocity.x === this.velocity.y && this.velocity.x === 0) &&
       !this.dead
     ) {
-      if (this.keylog.length > 1)
-        console.log(
-          {
-            x: this.keyToVel(this.keylog[this.keylog.length - 1]).x,
-            y: this.keyToVel(this.keylog[this.keylog.length - 1]).y,
-          },
-          { x: this.velocity.x, y: this.velocity.y },
-          this.checkVector(
-            this.velocity,
-            this.keyToVel(this.keylog[this.keylog.length - 1])
-              .copy()
-              .mult(-1)
-          )
-        );
+      console.log('FOR SOME REASON WE ARE IN THE IF STATEMENT');
+      // if (this.keylog.length > 1)
+      //   console.log(
+      //     {
+      //       x: this.keyToVel(this.keylog[this.keylog.length - 1]).x,
+      //       y: this.keyToVel(this.keylog[this.keylog.length - 1]).y,
+      //     },
+      //     { x: this.velocity.x, y: this.velocity.y },
+      //     this.checkVector(
+      //       this.velocity,
+      //       this.keyToVel(this.keylog[this.keylog.length - 1])
+      //         .copy()
+      //         .mult(-1)
+      //     )
+      //   );
 
       if (
         this.keylog.length >= 2 &&
@@ -187,10 +190,10 @@ class Snake {
           this.keyToVel(this.keylog[this.keylog.length - 1])
         )
       ) {
-        console.log('in the if statement');
+        //console.log('in the if statement');
         this.velocity = this.keyToVel(this.keylog[this.keylog.length - 2]);
       }
-      console.log({ x: this.velocity.x, y: this.velocity.y });
+      //console.log({ x: this.velocity.x, y: this.velocity.y });
       this.keylog = [];
 
       const newHead = p5.Vector.add(
@@ -209,9 +212,7 @@ class Snake {
           }
           if (this.checkTail(newHead, false)) {
             this.tail = prevTail;
-            this.dead = true;
-            dieSound.play();
-            music.pause();
+            this.die();
             return;
           }
         }
@@ -220,11 +221,24 @@ class Snake {
         // Check for new fruit
         this.eat(prevEndTail || this.head);
       } else {
-        this.dead = true;
-        dieSound.play();
-        music.pause();
+        this.die();
         return;
       }
+    }
+  }
+
+  die() {
+    this.dead = true;
+    dieSound.play();
+    music.pause();
+
+    const lowestLeaderboardEntry = getLowestLeaderboardEntry();
+    if (this.score > lowestLeaderboardEntry.score) {
+      const name = prompt(
+        'Congrats! You made it onto the leaderboard!\nPlease enter a name:'
+      ).slice(0, 20);
+      sendEntry({ name: name, score: this.score });
+      leaderBoardShowing = true;
     }
   }
 

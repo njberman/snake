@@ -116,8 +116,9 @@ function showStartMessage() {
 }
 
 function keyPressed() {
+  if (key === 'l') leaderBoardShowing = !leaderBoardShowing;
   if (!leaderBoardShowing) {
-    if (keyCode === 32) {
+    if (key === ' ') {
       // Check if spacebar is pressed
       if (snake.dead) {
         restartGame();
@@ -126,8 +127,6 @@ function keyPressed() {
       snake.move(key);
     }
   }
-
-  if (key === 'l') leaderBoardShowing = !leaderBoardShowing;
 }
 
 function restartGame() {
