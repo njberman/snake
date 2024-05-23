@@ -11,9 +11,17 @@ const port = process.env.PORT || 8080;
 const uri = process.env.URI;
 
 const client = new MongoClient(uri);
+
+let changeStream;
+
 const main = async () => {
   await client.connect();
   console.log('Connected successfuly to MongoDB');
+
+  const db = client.db('gameStuff');
+  const leaderboardColl = db.collection('leaderboard');
+
+  changeStream = leaderboardColl.watch();
 
   const getLeaderBoard = async () => {
     const res = await client
@@ -22,6 +30,12 @@ const main = async () => {
       .find({})
       .toArray();
     return res;
+  };
+
+  const updateLeaderboard = async () => {
+    leaderboard = await getLeaderBoard();
+    leaderboard.sort((a, b) => b.score - a.score);
+    io.emit('update leaderboard', JSON.stringify(leaderboard));
   };
 
   let leaderboard = await getLeaderBoard();
@@ -42,13 +56,6 @@ const main = async () => {
       console.log('User disconnected');
     });
 
-    const updateLeaderboard = async () => {
-      leaderboard = await getLeaderBoard();
-      leaderboard.sort((a, b) => b.score - a.score);
-      socket.broadcast.emit('update leaderboard', JSON.stringify(leaderboard));
-      socket.emit('update leaderboard', JSON.stringify(leaderboard));
-    };
-
     socket.on('new entry', async (JSONstring) => {
       const { name, score } = JSON.parse(JSONstring);
       // Check entry, do nothing if it's bad
@@ -65,5 +72,9 @@ const main = async () => {
   server.listen(port, () => {
     console.log(`Listening at http://localhost:${port}`);
   });
+
+  for await (const change of changeStream) {
+    updateLeaderboard();
+  }
 };
-main();
+main().catch(console.dir);
