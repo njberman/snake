@@ -19,6 +19,6 @@ socket.on('update leaderboard', (JSONstring) => {
 });
 
 const getLowestLeaderboardEntry = () =>
-  leaderboard.length > 0
+  leaderboard.length === 5
     ? leaderboard.reduce((a, b) => (a.score < b.score ? a : b))
     : { score: 0 };
