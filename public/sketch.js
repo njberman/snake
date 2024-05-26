@@ -45,7 +45,7 @@ async function draw() {
   drawGrid();
 
   if (clicked) {
-    if (!leaderBoardShowing && frameCount % 5 === 0) {
+    if (!leaderBoardShowing && (frameCount % 5) - 1 === 0) {
       snake.update();
     }
     snake.show();
@@ -123,7 +123,7 @@ function keyPressed() {
       if (snake.dead) {
         restartGame();
       }
-    } else {
+    } else if (frameCount % 5 === 0) {
       snake.move(key);
     }
   }
