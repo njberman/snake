@@ -123,7 +123,8 @@ function keyPressed() {
       if (snake.dead) {
         restartGame();
       }
-    } else if (frameCount % 5 === 0) {
+    } else {
+      console.log('Pressing key');
       snake.move(key);
     }
   }
